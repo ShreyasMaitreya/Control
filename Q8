@@ -1,0 +1,55 @@
+% Set system parameters
+g = 9.81;
+J = 0.0676;
+Jb = 0.000326;
+m = 0.9048;
+r = 0.03
+
+% Define the state-space matrices
+A = [0 0 0 -m*g/(0.25*0.25*m+J+Jb); 1 0 0 0; 0 -m*g*r^2/(Jb + m*r^2) 0 0; 0 0 1 0];
+B = [1/(0.5*m); 0; 1/(m*0.25); 1/((m*0.25*0.25)+J+Jb)];
+ % 4 rows, 1 column
+C = [1 0 0 0]; % Output is the first state
+D = zeros(size(C,1), size(B,2)); % 2 rows, 1 column
+
+
+
+% Define the weighting matrices for the controller and observer
+Q = eye(4); % State weighting matrix for the controller
+R = 1; % Input weighting matrix for the controller
+Q_est = eye(4); % State weighting matrix for the observer
+R_est = 1; % Output weighting matrix for the observer
+G = zeros(4,4); % Noise
+
+% Synthesize the optimal control gain using the lqr function
+K = lqr(A,B,Q,R);
+
+% Synthesize the optimal observer gain using the lqe function
+[L,G,~] = lqe(A,G,C,Q_est,R_est);
+
+% Define the initial state and observer error
+x0 = [0; 0; 0; 0]; % Initial state
+x_hat0 = [1; 1; 1; 1]; % Initial observer error
+
+% Define the time vector for the simulation
+t = linspace(0,10,100);
+
+% Convert the state-space matrices to transfer function form
+%sys = ss(A,B,C,D);
+sys = tf(ss(A,B,C,D));
+
+% Generate the impulsive input signal
+u = impulse(sys,t);
+
+% Simulate the open loop system
+[y,t,x] = lsim(sys,u,t,x0);
+
+% Simulate the closed loop system with the observer
+y_hat = lsim(A-L*C,B,L,D,u,t,x_hat0);
+
+% Plot the open and closed loop responses
+plot(t,y)
+hold on
+plot(t,y_hat)
+legend('Open loop','Closed loop with observer')
+
