@@ -1,0 +1,46 @@
+% Set system parameters
+g = 9.81;
+J = 0.0676;
+Jb = 0.000326;
+m = 0.9048;
+
+% Define the state-space matrices
+A = [0 1 0 0; 0 0 -g 0; 0 0 0 1; m*g/(J+Jb) 0 0 0];
+B = [1/(0.5*m); 0; 1/(m*0.25); 1/((m*0.25*0.25)+0.0676+0.000326)];
+C = [1 0 0 0];
+D = zeros(size(C,1), size(B,2));
+sys = ss(A,B,C,D);
+
+% Define the desired eigenvalues
+des_eig = [-42.3111+42.3111i, -42.3111-42.3111i, -42.3111+42.3111i, -42.3111-42.3111i];
+
+
+% Design the observer using the acker function
+L = acker(A',C',des_eig);
+
+% Define the initial state and observer error
+x0 = [0; 0; 0; 0]; % Initial state
+x_hat0 = [1; 1; 1; 1]; % Initial observer error
+
+% Define the time vector for the simulation
+t = linspace(0,1,10); % Time vector for 10 time steps
+
+% Convert the state-space matrices to transfer function form
+sys = tf(sys);
+
+% Generate the impulsive input signal
+u = impulse(sys,t);
+
+% Simulate the open loop system
+[y,t,x] = lsim(sys,u,t,x0);
+
+% Simulate the closed loop system with the observer
+y_hat = lsim(A-L'*C,B,L,D,u,t,x_hat0);
+
+% Plot the open and closed loop responses
+plot(t,y)
+hold on
+plot(t,y_hat)
+legend('Open loop','Closed loop with observer')
+
+
