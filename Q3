@@ -1,0 +1,22 @@
+% Set system parameters
+g = 9.81;
+J = 0.0676;
+Jb = 0.000326;
+m = 0.9048;
+
+% Define state matrices
+A = [0 1 0 0; 0 0 -g 0; 0 0 0 1; m*g/(J+Jb) 0 0 0];
+B = [1/(0.5*m); 0; 1/(m*0.25); 1/((m*0.25*0.25)+0.0676+0.000326)];
+C = [1 0 0 0];
+D = zeros(size(C,1), size(B,2));  % null matrix
+
+% Define time vector for simulation
+t = 0:0.01:5;  % time vector with 0.01 seconds intervals
+
+% Simulate impulse response of the system
+[y,t,x] = impulse(A,B,C,D,1,t);
+
+% Plot the impulse response
+plot(t,y)
+xlabel('Time (seconds)')
+ylabel('Impulse response')
