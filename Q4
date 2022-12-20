@@ -1,0 +1,36 @@
+% Define state and input matrices
+A = [0 1 0 0; 0 0 -g 0; 0 0 0 1; m*g/(J+Jb) 0 0 0];
+B = [1/(0.5*m); 0; 1/(m*0.25); 1/((m*0.25*0.25)+J+Jb)];
+C = [1 0 0 0];
+D = zeros(size(C,1), size(B,2));
+
+% Calculate controllability matrix
+n = size(A,1); % number of states
+Controllability = [B A*B A^2*B ... A^(n-1)*B];
+
+% Calculate observability matrix
+Observability = [C; C*A; C*A^2; ...; C*A^(n-1)];
+
+% Calculate rank of observability matrix
+RankObservability = rank(Observability);
+
+% Test for controllability
+if rank(Controllability) == n
+    fprintf('System is controllable\n');
+else
+    fprintf('System is not controllable\n');
+end
+
+% Test for observability
+if RankObservability == n
+    fprintf('System is observable\n');
+else
+    fprintf('System is not observable\n');
+end
+
+% Test for minimality
+if RankObservability == n
+    fprintf('System is minimal\n');
+else
+    fprintf('System is not minimal\n');
+end
