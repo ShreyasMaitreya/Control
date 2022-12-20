@@ -1,0 +1,20 @@
+% Set system parameters
+g = 9.81;
+J = 0.0676;
+Jb = 0.000326;
+m = 0.9048;
+
+% Define state matrices
+A = [0 1 0 0; 0 0 -g 0; 0 0 0 1; m*g/(J+Jb) 0 0 0];
+B = [1/(0.5*m); 0; 1/(m*0.25); 1/((m*0.25*0.25)+0.0676+0.000326)];
+C = [1 0 0 0];
+D = zeros(size(C,1), size(B,2));  % null matrix
+
+% Calculate eigenvalues
+eigenvalues = eig(A);
+
+% Select eigenvalues with negative real parts
+neg_real_eigenvalues = eigenvalues(real(eigenvalues) < 0);
+
+% Print selected eigenvalues
+disp(neg_real_eigenvalues)
