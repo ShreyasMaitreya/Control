@@ -1,4 +1,4 @@
-% Set system parameters
+ % Set system parameters
 g = 9.81;
 J = 0.0676;
 Jb = 0.000326;
@@ -11,10 +11,11 @@ C = [1 0 0 0];
 D = zeros(size(C,1), size(B,2));  % null matrix
 
 % Define time vector for simulation
-t = 0:0.01:5;  % time vector with 0.01 seconds intervals
+t = 0:0.1:10;  % time vector with 0.1 seconds intervals
 
 % Simulate impulse response of the system
-[y,t,x] = impulse(A,B,C,D,1,t);
+sys = ss(A,B,C,D)
+[y,t,x] = impulse(sys,t);
 
 % Plot the impulse response
 plot(t,y)
