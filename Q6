@@ -1,0 +1,40 @@
+% Set system parameters
+g = 9.81;
+J = 0.0676;
+Jb = 0.000326;
+m = 0.9048;
+
+% Define state matrices
+A = [0 1 0 0; 0 0 -g 0; 0 0 0 1; m*g/(J+Jb) 0 0 0];
+B = [1/(0.5*m); 0; 1/(m*0.25); 1/((m*0.25*0.25)+0.0676+0.000326)];
+C = [1 0 0 0];
+D = zeros(size(C,1), size(B,2));  % null matrix
+
+% Define desired eigenvalues
+desired_eigenvalues = [-4.2311+4.2311i, -4.2311-4.2311i, -4.2311+4.2311i, -4.2311-4.2311i];
+
+% Calculate feedback gain matrix
+K = acker(A,B,desired_eigenvalues);
+
+% Print feedback gain matrix
+disp(K)
+
+% Define time vector for simulation
+t = 0:0.01:5;  % time vector with 0.01 seconds intervals
+
+% Simulate closed-loop response of the system to an impulse input
+sys_cl = ss(A-B*K,B,C,D);
+[y_cl,t,x_cl] = impulse(sys_cl,t);
+
+% Simulate open-loop response of the system to an impulse input
+sys_ol = ss(A,B,C,D);
+[y_ol,t,x_ol] = impulse(sys_ol,t);
+
+% Plot closed-loop and open-loop responses
+figure
+plot(t,y_cl)
+hold on
+plot(t,y_ol)
+legend('Closed-loop', 'Open-loop')
+xlabel('Time (seconds)')
+ylabel('Response')
